@@ -1,0 +1,7 @@
+pandas
+langchain
+langchain_community
+bs4
+tqdm
+playwright
+nest_asyncio
