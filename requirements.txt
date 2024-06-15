@@ -1,7 +1,9 @@
 pandas
 langchain
-langchain_community
+langchain-groq
+openai
 bs4
 tqdm
 playwright
 nest_asyncio
+python-dotenv
