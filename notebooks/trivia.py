@@ -58,7 +58,6 @@ class QuestionAnswer(BaseModel):
     question: str = Field(..., description="Question that was asked")
     wrong_answer: str = Field(..., description="A trivia-style answer that is wrong")
     difficulty: str = Field(..., description="Difficulty level of the question")
-    categories: List[str] = Field(..., description="Sustainable category related to the question")
     answer: List[FactWithEvidence] = Field(
         ...,
         description=(
@@ -68,7 +67,7 @@ class QuestionAnswer(BaseModel):
     )
 
 
-def create_trivia_with_citation__chain(llm: BaseLanguageModel) -> LLMChain:
+def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
     """Create a trivia with citation  chain.
 
     Args:
@@ -77,7 +76,7 @@ def create_trivia_with_citation__chain(llm: BaseLanguageModel) -> LLMChain:
     Returns:
         Chain (LLMChain) that can be used to genetate trivia questions and answers with citations.
     """
-    output_parser = PydanticOutputFunctionsParser(pydantic_schema=QuestionAnswer)
+    output_parser = PydanticOutputFunctionsParser(pydantic_schema=List[QuestionAnswer])
     schema = QuestionAnswer.schema()
     function = {
         "name": schema["title"],
