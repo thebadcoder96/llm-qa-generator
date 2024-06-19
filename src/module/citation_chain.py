@@ -6,8 +6,8 @@ from langchain_core.output_parsers.openai_functions import PydanticOutputFunctio
 from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 
-from langchain.chains.llm import LLMChain
-from langchain.chains.openai_functions.utils import get_llm_kwargs
+from langchain_core.runnables import RunnablePassthrough
+
 
 
 class FactWithEvidence(BaseModel):
@@ -73,23 +73,15 @@ class QuestionAnswersList(BaseModel):
     trivias : List[QuestionAnswer] = Field(..., description="List of questions and answers as a list of facts")
 
 
-def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
-    """Create a trivia with citation  chain.
+def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> RunnablePassthrough:
+    """Create a trivia with citation chain.
 
     Args:
         llm: Language model to use for the chain.
 
     Returns:
-        Chain (LLMChain) that can be used to genetate trivia questions and answers with citations.
+        Chain that can be used to genetate trivia questions and answers with citations.
     """
-    output_parser = PydanticOutputFunctionsParser(pydantic_schema=QuestionAnswersList)
-    schema = QuestionAnswersList.schema()
-    function = {
-        "name": schema["title"],
-        "description": schema["description"],
-        "parameters": schema,
-    }
-    llm_kwargs = get_llm_kwargs(function)
     messages = [
         SystemMessage(
             content=(
@@ -97,11 +89,9 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
                 "questions and answers with correct and exact citations."
             )
         ),
-        HumanMessage(
-            content=(
+         HumanMessagePromptTemplate.from_template(
                 "Generate {num_questions} sets of trivia-style questions "
                 "and answers using the following context"
-            )
         ),
         HumanMessagePromptTemplate.from_template("{context}"),
         HumanMessage(
@@ -111,12 +101,11 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
             )
         ),
     ]
-    prompt = ChatPromptTemplate(messages=messages)  # type: ignore[arg-type, call-arg]
+    prompt = ChatPromptTemplate(messages=messages)
 
-    chain = LLMChain(
-        llm=llm,
-        prompt=prompt,
-        llm_kwargs=llm_kwargs,
-        output_parser=output_parser,
+    chain = (
+        RunnablePassthrough.assign(context=(lambda x: x["context"])).assign(num_questions=(lambda x: x["num_questions"]))
+        | prompt
+        | llm.with_structured_output(QuestionAnswersList)
     )
     return chain
