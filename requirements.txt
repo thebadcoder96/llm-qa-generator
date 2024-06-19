@@ -1,5 +1,6 @@
 pandas
 langchain
+langchain-openai
 openai
 regex
 bs4

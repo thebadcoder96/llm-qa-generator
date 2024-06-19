@@ -20,14 +20,14 @@ class FactWithEvidence(BaseModel):
 
     fact: str = Field(..., description="Body of the sentence, as part of a response")
     trivia_answer: str = Field(..., description="Trivia-style answer, like one word or phrase")
-    substring_quote: List[str] = Field(
+    substring_quote: str = Field(
         ...,
         description=(
-            "Each source should be a direct quote from the context, "
+            "The source should be a direct quote from the context, "
             "as a substring of the original content"
         ),
     )
-    sources: List[str] = Field(
+    sources: str = Field(
         ..., description="The EXACT source link corresponding to the substring_quote"
     )
 
@@ -52,19 +52,25 @@ class FactWithEvidence(BaseModel):
 
 
 class QuestionAnswer(BaseModel):
-    """A question and its answer as a list of facts each one should have a source.
+    """Trivia style questions and its answers as a list of facts each one should have a source.
     each sentence contains a body and a list of sources."""
 
     question: str = Field(..., description="Question that was asked")
     wrong_answer: str = Field(..., description="A trivia-style answer that is wrong")
     difficulty: str = Field(..., description="Difficulty level of the question")
-    answer: List[FactWithEvidence] = Field(
+    answer: FactWithEvidence = Field(
         ...,
         description=(
-            "Body of the answer, each fact should be "
+            "Body of the answer, the fact should be "
             "its separate object with a body and a list of sources"
         ),
     )
+
+class QuestionAnswersList(BaseModel):
+    """Class representing a list of trivia style questions and answers with correct and exact citations.
+    each sentence contains a body and a list of sources."""
+
+    trivias : List[QuestionAnswer] = Field(..., description="List of questions and answers as a list of facts")
 
 
 def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
@@ -76,8 +82,8 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
     Returns:
         Chain (LLMChain) that can be used to genetate trivia questions and answers with citations.
     """
-    output_parser = PydanticOutputFunctionsParser(pydantic_schema=List[QuestionAnswer])
-    schema = QuestionAnswer.schema()
+    output_parser = PydanticOutputFunctionsParser(pydantic_schema=QuestionAnswersList)
+    schema = QuestionAnswersList.schema()
     function = {
         "name": schema["title"],
         "description": schema["description"],
@@ -91,9 +97,13 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> LLMChain:
                 "questions and answers with correct and exact citations."
             )
         ),
-        HumanMessage(content="Generate trivia-style questions and answers using the following context"),
+        HumanMessage(
+            content=(
+                "Generate {num_questions} sets of trivia-style questions "
+                "and answers using the following context"
+            )
+        ),
         HumanMessagePromptTemplate.from_template("{context}"),
-        HumanMessagePromptTemplate.from_template("Number of Questions to generate: {question}"),
         HumanMessage(
             content=(
                 "Tips: Make sure to cite your sources, "
