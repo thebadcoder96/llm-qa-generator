@@ -15,9 +15,9 @@ def get_urls(category: str = 'Water', number: int = 1):
     cat_df = cat_df.sample(number)['Resources']
     return cat_df.values.tolist()
 
-def extract_urls(number: int = 2):
+def extract_urls(urls: list = []):
     # Add logic to determine the number of urls to extract based on number of questions
-    urls = get_urls(number=number)
+    # urls = get_urls(number=number)
     
     loader = AsyncChromiumLoader(urls)
     docs = loader.load()
@@ -34,6 +34,6 @@ def extract_urls(number: int = 2):
     ]
     return formatted
 
-if __name__ == "__main__":
-    formatted = extract_urls()
-    print(formatted)
+# if __name__ == "__main__":
+#     formatted = extract_urls()
+#     print(formatted)
