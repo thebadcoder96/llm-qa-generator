@@ -6,6 +6,7 @@ from module.create_trivia import generate_trivia
 
 st.set_page_config(page_title="Trivia Generator", page_icon="🙋🏻‍♂️",)
 
+
 st.title("🙋🏻‍♂️ Trivia Generator")
 
 st.write("Welcome to the Trivia Generator!")
@@ -24,15 +25,27 @@ with st.form("options_form", clear_on_submit=False):
 
 if submitted:
      if category:
+          urls = get_urls(category=category, number=num_questions)
+          st.write(f"Chose {len(urls)} URLs for {category}.")
           with st.spinner(f"Extracting {category} URLs..."):
-              urls = get_urls(category=category, number=num_questions)
-              st.write(f"Chose {len(urls)} URLs for {category}.")
               for url in urls:
                 st.write(f"- {url}")
               context = extract_urls(urls=urls)
               st.success(f"Extracted Successfully!")
                
           with st.spinner(f"Generating {num_questions} trivia questions and answers..."):
-               trivia = generate_trivia(num_questions=num_questions, context=context)
+               result = generate_trivia(num_questions=num_questions, context=context)
                st.success(f"Generated Successfully!")
-               st.write(trivia)
+               st.subheader("Trivia Questions and Answers")
+               for trivia in result.trivias:
+                    st.write(f"Question: {trivia.question}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"Answer: {trivia.answer.trivia_answer}")
+                    with col2:
+                        st.write(f"Wrong Answer: {trivia.wrong_answer}")
+                    st.write(f"Fact/Reason: {trivia.answer.fact}")
+                    st.write(f"Sources: {trivia.answer.sources}")
+                    st.write(f"Citation: ... _{trivia.answer.substring_quote}_ ...")
+                    st.write(f"Difficulty: {trivia.difficulty}")
+                    st.write("---")
