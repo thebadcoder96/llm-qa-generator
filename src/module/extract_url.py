@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import AsyncChromiumLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.document_transformers import BeautifulSoupTransformer
 import pandas as pd
 
@@ -19,7 +19,7 @@ def extract_urls(urls: list = []):
     # Add logic to determine the number of urls to extract based on number of questions
     # urls = get_urls(number=number)
     
-    loader = AsyncChromiumLoader(urls)
+    loader = WebBaseLoader(urls)
     docs = loader.load()
     bs_transformer = BeautifulSoupTransformer()
 

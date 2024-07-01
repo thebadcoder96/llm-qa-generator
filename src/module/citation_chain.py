@@ -103,10 +103,5 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> RunnablePassthr
     ]
     prompt = ChatPromptTemplate(messages=messages)
 
-    chain = (
-        # {"context": RunnablePassthrough(), "num_questions": RunnablePassthrough()}
-        RunnablePassthrough.assign(context=(lambda x: x["context"])).assign(num_questions=(lambda x: x["num_questions"]))
-        | prompt
-        | llm.with_structured_output(QuestionAnswersList)
-    )
+    chain = prompt | llm.with_structured_output(QuestionAnswersList)
     return chain
