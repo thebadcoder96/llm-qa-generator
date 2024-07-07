@@ -1,6 +1,7 @@
 pandas
 langchain
 langchain-openai
+langchain-groq
 langchain-community
 python-dotenv
 streamlit

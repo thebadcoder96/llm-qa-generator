@@ -2,8 +2,7 @@ from typing import Iterator, List
 
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers.openai_functions import PydanticOutputFunctionsParser
-from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from langchain_core.runnables import RunnablePassthrough
@@ -93,7 +92,7 @@ def create_trivia_with_citation_chain(llm: BaseLanguageModel) -> RunnablePassthr
                 "Generate {num_questions} sets of trivia-style questions "
                 "and answers using the following context"
         ),
-        HumanMessagePromptTemplate.from_template("{context}"),
+        MessagesPlaceholder("context"),
         HumanMessage(
             content=(
                 "Tips: Make sure to cite your sources, "
