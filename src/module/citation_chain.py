@@ -17,7 +17,7 @@ class FactWithEvidence(BaseModel):
     such that each one only uses a set of sources that are relevant to it.
     """
 
-    fact: str = Field(..., description="Body of the sentence, as part of a response")
+    fact: str = Field(..., description="Reason of the right answer, as part of a response")
     trivia_answer: str = Field(..., description="Trivia-style answer, like one word or phrase")
     substring_quote: str = Field(
         ...,
